@@ -126,7 +126,7 @@ resources:
           DefaultRootObject: 'index.html'
           Origins:
             - Id: Web
-              DomainName: !Sub '${WebBucket}.s3-website.eu-west-2.amazonaws.com'
+              DomainName: !Sub '${WebBucket}.s3-website.eu-west-1.amazonaws.com'
               CustomOriginConfig:
                 OriginProtocolPolicy: 'http-only'
           DefaultCacheBehavior:
