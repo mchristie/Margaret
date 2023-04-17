@@ -1,39 +1,44 @@
 import React, { useState, useEffect } from 'react';
+import Socket from '../../Services/Socket';
 
-const Welcome = ({ setName, setRoomId }) => {
-    const [tmpRoomId, setTmpRoomId] = useState('');
-    const [tmpName, setTmpName] = useState('');
+const Welcome = ({ setName }) => {
+    const [tmpConversationId, setTmpConversationId] = useState('');
+    const [tmpName, setTmpName] = useState('Test name');
 
-    const startRoom = () => {
-        setRoomId(
-            [
-                Math.round(Math.random() * 10),
-                Math.round(Math.random() * 10),
-                Math.round(Math.random() * 10),
-                Math.round(Math.random() * 10),
-                Math.round(Math.random() * 10),
-                Math.round(Math.random() * 10),
-                Math.round(Math.random() * 10),
-                Math.round(Math.random() * 10),
-            ].join('')
-        );
+    const startConversation = () => {
+        setName(tmpName);
+        Socket.send({
+            action: 'start',
+            data: {
+                user: {
+                    name: tmpName
+                }
+            }
+        });
     }
 
-    const joinRoom = () => {
-        if (tmpRoomId.match(/^[0-9]{8}$/) === null) {
-            alert('Please enter a valid room ID');
+    const joinConversation = () => {
+        if (tmpConversationId.match(/^[0-9]{8}$/) === null) {
+            alert('Please enter a valid conversation ID');
             return;
         }
 
-        setRoomId(tmpRoomId);
+        setName(tmpName);
+        Socket.send({
+            action: 'join',
+            user: {
+                conversationId: tmpConversationId,
+                name: tmpName
+            }
+        });
     }
 
     useEffect(() => {
-        if (tmpRoomId.match(/^[0-9]{8}$/) !== null) {
-            joinRoom();
+        if (tmpConversationId.match(/^[0-9]{8}$/) !== null) {
+            joinConversation();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [tmpRoomId]);
+    }, [tmpConversationId]);
 
     return (
         <div className="container">
@@ -56,7 +61,7 @@ const Welcome = ({ setName, setRoomId }) => {
                     <div className="row">
                         <div className="col">
                             <div className="mb-3">
-                                <button className="btn btn-primary" onClick={() => startRoom()}>Start room</button>
+                                <button className="btn btn-primary" onClick={() => startConversation()}>Start conversation</button>
                             </div>
                         </div>
                         <div className="col">
@@ -66,9 +71,9 @@ const Welcome = ({ setName, setRoomId }) => {
                             <div className="mb-3">
                                 <input type="text"
                                     className="form-control"
-                                    placeholder="Room ID"
-                                    value={tmpRoomId}
-                                    onChange={(e) => setTmpRoomId(e.target.value)}
+                                    placeholder="Conversation ID"
+                                    value={tmpConversationId}
+                                    onChange={(e) => setTmpConversationId(e.target.value)}
                                 />
                             </div>
                         </div>

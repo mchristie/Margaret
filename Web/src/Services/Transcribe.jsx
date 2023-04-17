@@ -21,14 +21,23 @@ export const startRecording = async (callback) => {
 };
 
 export const stopRecording = function () {
-    if (microphoneStream) {
-        microphoneStream.stop();
-        microphoneStream.destroy();
-        microphoneStream = undefined;
+    try {
+        if (microphoneStream) {
+            microphoneStream.stop();
+            microphoneStream.destroy();
+            microphoneStream = undefined;
+        }
+    } catch (e) {
+        console.error('Mic error', e);
     }
-    if (transcribeClient) {
-        transcribeClient.destroy();
-        transcribeClient = undefined;
+
+    try {
+        if (transcribeClient) {
+            transcribeClient.destroy();
+            transcribeClient = undefined;
+        }
+    } catch (e) {
+        console.error('Transcribe error', e);
     }
 };
 

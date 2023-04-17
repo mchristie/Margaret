@@ -5,6 +5,25 @@ provider:
   region: eu-west-1
   stage: production
   timeout: 300
+  logs:
+    websocket:
+      accessLogging: true
+      format: '$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] "$context.eventType $context.routeKey $context.connectionId" $context.status  $context.requestId'
+      executionLogging: true
+      level: INFO # ERROR
+  tracing:
+    apiGateway: true
+    lambda: true
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - 'lambda:*'
+        - 'xray:Put*'
+        - 'route53:*'
+        - 'execute-api:*'
+        - 'dynamodb:*'
+      Resource:
+        - '*'
 
 plugins:
   - serverless-prune-plugin
@@ -13,6 +32,41 @@ custom:
   prune:
     automatic: true
     number: 3
+
+functions:
+  Connection:
+    architecture: arm64
+    runtime: nodejs18.x
+    handler: ./API/Connection.handler
+    package:
+      individually: true
+      patterns:
+      - '!./**'
+      - './API/**'
+    environment:
+      CONVERSATIONS_TABLE: !Ref DynamoConversationsTable
+      # TODO - Obviously this shouldn't be hardcoded
+      API_ENDPOINT: !Sub 'https://bla3zyhdh5.execute-api.eu-west-1.amazonaws.com/production/'
+    events:
+    - websocket:
+        route: $connect
+        authorizer:
+          name: Auth # references the auth function below
+          identitySource:
+          - 'route.request.querystring.Auth'
+    - websocket:
+        route: $disconnect
+    - websocket:
+        route: $default
+  Auth:
+    architecture: arm64
+    runtime: nodejs18.x
+    handler: ./API/Authorize.handler
+    package:
+      individually: true
+      patterns:
+      - '!./**'
+      - './API/**'
 
 resources:
   Resources:
@@ -23,12 +77,13 @@ resources:
         CorsConfiguration:
           CorsRules:
             - AllowedHeaders: ["*"]
-              AllowedMethods: [GET, PUT]
+              AllowedMethods: [GET]
               AllowedOrigins: ["*"]
               MaxAge: 31536000
               ExposedHeaders: ['ETag']
         WebsiteConfiguration:
           IndexDocument: index.html
+
     WebBucketPolicy:
       Type: AWS::S3::BucketPolicy
       Properties:
@@ -39,3 +94,51 @@ resources:
               Principal: '*'
               Action: 's3:GetObject'
               Resource: 'arn:aws:s3:::margaret-chat-web/*'
+
+    DynamoConversationsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Margaret-Conversations-${self:provider.stage}
+        AttributeDefinitions:
+          - AttributeName: ConversationId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ConversationId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    WebsiteCDN:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          Aliases:
+            - 'margaret.chat'
+          ViewerCertificate:
+            AcmCertificateArn: arn:aws:acm:us-east-1:226724292713:certificate/e97b3e50-7f55-4a09-9676-5e6a81e5a22e
+            SslSupportMethod: 'sni-only'
+            MinimumProtocolVersion: TLSv1.1_2016
+          Enabled: true
+          PriceClass: PriceClass_100
+          HttpVersion: http2and3
+          IPV6Enabled: true
+          DefaultRootObject: 'index.html'
+          Origins:
+            - Id: Web
+              DomainName: !Sub '${WebBucket}.s3-website.eu-west-2.amazonaws.com'
+              CustomOriginConfig:
+                OriginProtocolPolicy: 'http-only'
+          DefaultCacheBehavior:
+            AllowedMethods: [HEAD, GET, OPTIONS]
+            CachedMethods: [HEAD, GET, OPTIONS]
+            TargetOriginId: Web
+            ViewerProtocolPolicy: redirect-to-https
+            Compress: true
+            MinTTL: 0
+            DefaultTTL: 86400
+            MaxTTL: 31536000
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
