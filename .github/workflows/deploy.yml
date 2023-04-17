@@ -40,7 +40,8 @@ jobs:
     runs-on: 'ubuntu-latest'
     timeout-minutes: 20
     defaults:
-      directory: Web
+      run:
+        working-directory: Web
 
     steps:
 
