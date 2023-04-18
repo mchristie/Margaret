@@ -49,6 +49,11 @@ const Welcome = () => {
                 <div className="col-12">
                     <h3>The simple free service to help the hearing impaired communicate.</h3>
                     <h3>No downloads, no logins, no fuss.</h3>
+
+                    <div className="alert alert-warning">
+                        This is a proof of concept. It's riddled with bugs.<br />
+                        Please contribute at <a href="https://github.com/mchristie/margaret">github.com/mchristie/margaret</a>
+                    </div>
                 </div>
             </div>
 

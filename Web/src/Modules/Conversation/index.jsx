@@ -78,7 +78,7 @@ const Room = ({ conversationId }) => {
                     <button className="btn btn-secondary w-100 mt-5"
                         onClick={() => Faker.sendMessage(conversationId)}
                     >
-                        Fake message
+                        Test message
                     </button>
 
                 </div>

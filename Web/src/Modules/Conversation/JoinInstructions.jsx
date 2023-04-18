@@ -6,10 +6,10 @@ const JoinInstructions = ({conversationId}) => {
     const formatted = conversationId.replace(regex, '$1-$2');
 
     return <div className="row">
-        <div className="col">
-            <div className="alert alert-primary w-50 mx-auto text-center">
-                Conversation ID<br />
-                <span className="display-4">{formatted}</span>
+        <div className="col-8 col-md-6 mx-auto">
+            <div className="alert alert-primary mx-auto text-center">
+                <span className="display-4">{formatted}</span><br />
+                Enter this code to join from any device.
             </div>
         </div>
     </div>
