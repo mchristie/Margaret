@@ -18,7 +18,6 @@ class Users {
       await this.apiGatewayManagementApiClient.send(command);
     } catch (error) {
       console.error('Error sending message to user:', error);
-      throw error;
     }
   }
 }

@@ -1,40 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import Socket from '../../Services/Socket';
+import Settings from '../../Services/Settings';
 
-const Welcome = ({ setName }) => {
+const Welcome = () => {
     const [tmpConversationId, setTmpConversationId] = useState('');
-    const [tmpName, setTmpName] = useState('Test name');
+    const [working, setWorking] = useState(false);
 
     const startConversation = () => {
-        setName(tmpName);
         Socket.send({
             action: 'start',
             data: {
                 user: {
-                    name: tmpName
+                    name: Settings.get('name')
                 }
             }
         });
+        setWorking(true);
     }
 
     const joinConversation = () => {
-        if (tmpConversationId.match(/^[0-9]{8}$/) === null) {
+        if (tmpConversationId.match(/^[0-9]{6}$/) === null) {
             alert('Please enter a valid conversation ID');
             return;
         }
 
-        setName(tmpName);
         Socket.send({
             action: 'join',
-            user: {
+            data: {
                 conversationId: tmpConversationId,
-                name: tmpName
+                user: {
+                    name: Settings.get('name')
+                }
             }
         });
+        setWorking(true);
     }
 
     useEffect(() => {
-        if (tmpConversationId.match(/^[0-9]{8}$/) !== null) {
+        if (tmpConversationId.match(/^[0-9]{6}$/) !== null) {
             joinConversation();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -43,43 +46,39 @@ const Welcome = ({ setName }) => {
     return (
         <div className="container">
             <div className="row">
-                <div className="col">
-                    <h1 className="display-1">Welcome</h1>
-
-                    <div className="mb-3">
-                        <label className="form-label">Set your name</label>
-                        <input type="text"
-                            className="form-control"
-                            placeholder="Joe Bloggs"
-                            value={tmpName}
-                            onChange={(e) => setTmpName(e.target.value)}
-                        />
-                    </div>
-
-                    <hr />
-
-                    <div className="row">
-                        <div className="col">
-                            <div className="mb-3">
-                                <button className="btn btn-primary" onClick={() => startConversation()}>Start conversation</button>
-                            </div>
-                        </div>
-                        <div className="col">
-                            OR
-                        </div>
-                        <div className="col">
-                            <div className="mb-3">
-                                <input type="text"
-                                    className="form-control"
-                                    placeholder="Conversation ID"
-                                    value={tmpConversationId}
-                                    onChange={(e) => setTmpConversationId(e.target.value)}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
+                <div className="col-12">
+                    <h3>The simple free service to help the hearing impaired communicate.</h3>
+                    <h3>No downloads, no logins, no fuss.</h3>
                 </div>
+            </div>
+
+            <div className="row mt-5 text-center">
+
+                <div className="col-12">
+                    <div className="mb-3">
+                        <button className="btn btn-primary"
+                            onClick={() => startConversation()}
+                            style={{width: '200px'}}
+                            disabled={working}
+                        >
+                            Start conversation
+                        </button>
+                    </div>
+                </div>
+                <div className="col-12">
+                    <p>- &nbsp; or &nbsp; -</p>
+                </div>
+                <div className="col-12">
+                    <input type="text"
+                        style={{width: '200px'}}
+                        className="form-control mx-auto"
+                        placeholder="Conversation ID"
+                        value={tmpConversationId}
+                        onChange={(e) => setTmpConversationId(e.target.value)}
+                        disabled={working}
+                    />
+                </div>
+
             </div>
         </div>
     );

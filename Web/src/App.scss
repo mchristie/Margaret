@@ -1,1 +1,24 @@
 @import "~bootstrap/scss/bootstrap";
+
+html, body, #root {
+    @extend .bg-light;
+    @extend .h-100;
+}
+
+#main {
+    @extend .container;
+    @extend .mx-auto;
+    @extend .h-100;
+    @extend .p-3;
+    @extend .bg-white;
+}
+
+#conversation-outer {
+    overflow-x: visible;
+    overflow-y: scroll;
+}
+
+#conversation-inner {
+    height: auto;
+    width: 100%;
+}

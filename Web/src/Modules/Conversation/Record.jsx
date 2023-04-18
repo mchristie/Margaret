@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { startRecording, stopRecording } from "../../Services/Transcribe";
+import Ellipses from '../../Components/Ellipses';
 
 let stopTimeout;
 const CUT_OFF_SECONDS = 5;
 
-const Record = ({ addMessage }) => {
+const Record = ({ partialMessage, finalMessage }) => {
     const [isRecording, setIsRecording] = useState(false);
     const [text, setText] = useState('');
 
@@ -19,14 +20,17 @@ const Record = ({ addMessage }) => {
         setIsRecording(false);
         stopRecording();
         if (text) {
-            addMessage(text);
+            finalMessage(text);
         }
+        setText('');
     }
 
     const doStart = () => {
-        setText('');
         setIsRecording(true);
-        startRecording(setText);
+        startRecording(t => {
+            setText(t);
+            partialMessage(t);
+        });
     }
 
     useEffect(() => {
@@ -38,9 +42,13 @@ const Record = ({ addMessage }) => {
     }, [text, isRecording]);
 
     return <div>
-        <button className="btn btn-primary" onClick={toggle}>{isRecording ? 'Stop' : 'Start'}</button>
+        <button className={'btn btn-lg w-100 '+ (isRecording ? 'btn-danger' : 'btn-primary')}
+            onClick={toggle}>
+                {isRecording ? 'Recording' : 'Record your message'}
+                {isRecording && <Ellipses />}
+        </button>
 
-        <p>{text}</p>
+        {/* <p>{text}</p> */}
     </div>
 }
 
