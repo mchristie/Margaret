@@ -18,7 +18,12 @@ function App() {
             if (conversationId) {
                 Socket.send({
                     action: 'reJoin',
-                    data: {conversationId, user: Settings.get('name')}
+                    data: {
+                        conversationId,
+                        user: {
+                            name: Settings.get('name')
+                        }
+                    }
                 });
             }
         });
