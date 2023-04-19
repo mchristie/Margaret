@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Socket from '../../Services/Socket';
 import Settings from '../../Services/Settings';
 
@@ -36,13 +36,6 @@ const Welcome = () => {
         setWorking(true);
     }
 
-    useEffect(() => {
-        if (tmpConversationId.match(/^[0-9]{6}$/) !== null) {
-            joinConversation();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [tmpConversationId]);
-
     return (
         <div className="container">
             <div className="row">
@@ -74,14 +67,21 @@ const Welcome = () => {
                     <p>- &nbsp; or &nbsp; -</p>
                 </div>
                 <div className="col-12">
-                    <input type="text"
-                        style={{width: '200px'}}
-                        className="form-control mx-auto"
-                        placeholder="Conversation ID"
-                        value={tmpConversationId}
-                        onChange={(e) => setTmpConversationId(e.target.value)}
-                        disabled={working}
-                    />
+                    <div className="row mx-auto" style={{width: '200px'}}>
+                        <input type="text"
+                            className="form-control mx-auto"
+                            placeholder="Conversation ID"
+                            value={tmpConversationId}
+                            onChange={(e) => setTmpConversationId(e.target.value)}
+                            disabled={working}
+                        />
+                        <button className="btn btn-primary mt-2"
+                            onClick={() => joinConversation()}
+                            disabled={working}
+                        >
+                            Join
+                        </button>
+                    </div>
                 </div>
 
             </div>

@@ -11,7 +11,14 @@ class Conversations {
     }
 
     async startConversation() {
-        const conversationId = Math.floor(Math.random() * 1000000).toString();
+        const conversationId = [
+            Math.round(Math.random() * 10).toString(),
+            Math.round(Math.random() * 10).toString(),
+            Math.round(Math.random() * 10).toString(),
+            Math.round(Math.random() * 10).toString(),
+            Math.round(Math.random() * 10).toString(),
+            Math.round(Math.random() * 10).toString(),
+        ].join('');
 
         const params = {
             TableName: this.tableName,

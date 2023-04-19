@@ -7,12 +7,23 @@ const Settings = new class {
 
     setDefaultSettings() {
         this.settings = {
-            'name' : window.localStorage.getItem('name') || this.makeName(),
+            'name' : window.localStorage.getItem('name') ?? this.makeName(),
+            'conversationId' : window.localStorage.getItem('conversationId') ?? null,
         }
+    }
+
+    reset() {
+        window.localStorage.clear();
+        this.setDefaultSettings();
     }
 
     get(setting) {
         return this.settings[setting];
+    }
+
+    set(setting, value) {
+        this.settings[setting] = value;
+        window.localStorage.setItem(setting, value);
     }
 
     makeName() {

@@ -8,13 +8,19 @@ import Header from './Components/Header';
 import Settings from './Services/Settings';
 
 function App() {
-    const [conversationId, setConversationId] = useState(null);
+    const [conversationId, setConversationId] = useState(Settings.get('conversationId'));
     const [connected, setConnected] = useState(false);
 
     useEffect(() => {
         const openRemove = Socket.onOpen(() => {
             console.log('Connected!');
             setConnected(true);
+            if (conversationId) {
+                Socket.send({
+                    action: 'reJoin',
+                    data: {conversationId, user: Settings.get('name')}
+                });
+            }
         });
         const closeRemove = Socket.onClose(() => {
             console.log('Disconnected :(');
@@ -25,13 +31,17 @@ function App() {
             console.log('Message received', event, data);
             if (data?.conversationId) {
                 setConversationId(data?.conversationId);
+                Settings.set('conversationId', data?.conversationId);
             }
         });
 
         // Sometimes events seem to get stuck, but relaying a ping can help
         // Could be an issue with the lambda pausing before the event is sent :/
         const ping = setInterval(() => {
-            Socket.send({action: 'ping', data: {user: Settings.get('name')}});
+            Socket.send({
+                action: 'ping',
+                data: {user: Settings.get('name')}
+            });
         }, 5 * 1000);
 
         Socket.connect();
@@ -42,7 +52,7 @@ function App() {
             messageRemove();
             clearInterval(ping);
         }
-    }, []);
+    }, [conversationId]);
 
     let display = null;
     if (!connected) {

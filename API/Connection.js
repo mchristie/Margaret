@@ -35,6 +35,8 @@ const handleAction = async (payload, connectionId) => {
             return await startConversation(data.user, connectionId);
         case 'join':
             return await joinConversation(data.conversationId, connectionId, data.user);
+        case 'reJoin':
+            return await reJoinConversation(data.conversationId, connectionId, data.user);
         case 'send':
             return await sendMessage(data.conversationId, data.user, data.message);
         case 'ping':
@@ -55,6 +57,11 @@ const joinConversation = async (conversationId, connectionId, user) => {
     await emitEvent(conversationId, 'userJoined', {conversationId, user});
 }
 
+const reJoinConversation = async (conversationId, connectionId, user) => {
+    await Conversations.addUser(conversationId, connectionId, user.name);
+    await emitEvent(conversationId, 'userReJoined', {conversationId, user});
+}
+
 const sendMessage = async (conversationId, sendingUser, message) => {
     await emitEvent(conversationId, 'messageSent', {user: sendingUser, message});
 }
@@ -63,7 +70,7 @@ const sendPing = async (conversationId, connectionId, sendingUser) => {
     if (conversationId) {
         await emitEvent(conversationId, 'ping', {user: sendingUser});
     } else {
-        await Users.sendMessage(connectionId, {user: sendingUser});
+        await Users.sendMessage(connectionId, {event: 'ping', data: {user: sendingUser}});
     }
 }
 
